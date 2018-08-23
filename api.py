@@ -21,22 +21,22 @@ TODOS = {
 #   'data-fixed' can be dropped into the body of a future request, unaltered.
 TODO_OPS = {
     'complete-todo': {
-        'url': 'http://localhost:5000/todos/{todo_id}/status',
-        'method': 'PUT',
+        'url': 'http://localhost:5000/todos/{todo_id}',
+        'method': 'POST',
         'data-fixed': {'status': 'complete'}
     },
     'work-todo': {
-        'url': 'http://localhost:5000/todos/{todo_id}/status',
-        'method': 'PUT',
+        'url': 'http://localhost:5000/todos/{todo_id}',
+        'method': 'POST',
         'data-fixed': {'status': 'working'}
     },
     'delete-todo': {
-        'url': 'http://localhost:5000/todos/{todo_id}/status',
-        'method': 'DELETE'
+        'url': 'http://localhost:5000/todos/{todo_id}',
+        'method': 'POST'
     },
     'change-task': {
-        'url': 'http://localhost:5000/todos/{todo_id}/status',
-        'method': 'PUT',
+        'url': 'http://localhost:5000/todos/{todo_id}',
+        'method': 'POST',
         'data-template': {'task': '<str:task>'}
     }
 }
@@ -71,16 +71,6 @@ class TodoStatus(Resource):
         ops = prepare_todo_ops(todo_id)
         return {'todo_id': todo_id, 'status': status, 'operations': ops}
 
-    def put(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        todo = TODOS[todo_id]
-        args = parser.parse_args()
-        status = args['status']
-        TODOS[todo_id]['status'] = status
-        ops = prepare_todo_ops(todo_id, **args)
-        todo["operations"] = ops
-        return todo, 201
-
 
 # Todo
 # shows a single todo item and lets you delete a todo item
@@ -102,6 +92,17 @@ class Todo(Resource):
         task = {'task': args['task']}
         TODOS[todo_id] = task
         return task, 201
+
+    def post(self, todo_id):
+        abort_if_todo_doesnt_exist(todo_id)
+        todo = TODOS[todo_id]
+        args = parser.parse_args()
+        status = args['status']
+        TODOS[todo_id]['status'] = status
+        ops = prepare_todo_ops(todo_id, **args)
+        todo["operations"] = ops
+        return todo, 201
+
 
 
 # TodoList
