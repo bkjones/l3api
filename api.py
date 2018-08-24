@@ -11,6 +11,9 @@ TODOS = {
     'todo3': {'task': 'profit!', 'status': 'backlog'},
 }
 
+RESOURCE_MAP = {
+    'todos': 'http://localhost:5000/todos'
+}
 
 #   In this structure, items inside quotes surrounded by curly braces are items the *server* should replace before
 # sending to the client. Items in angle brackets are delivered as-is to the client, and are items the client should
@@ -21,22 +24,22 @@ TODOS = {
 #   'data-fixed' can be dropped into the body of a future request, unaltered.
 TODO_OPS = {
     'complete-todo': {
-        'url': 'http://localhost:5000/todos/{todo_id}',
-        'method': 'POST',
+        'url': 'http://localhost:5000/todos/{todo_id}/status',
+        'method': 'PUT',
         'data-fixed': {'status': 'complete'}
     },
     'work-todo': {
-        'url': 'http://localhost:5000/todos/{todo_id}',
-        'method': 'POST',
+        'url': 'http://localhost:5000/todos/{todo_id}/status',
+        'method': 'PUT',
         'data-fixed': {'status': 'working'}
     },
     'delete-todo': {
         'url': 'http://localhost:5000/todos/{todo_id}',
-        'method': 'POST'
+        'method': 'DELETE'
     },
     'change-task': {
         'url': 'http://localhost:5000/todos/{todo_id}',
-        'method': 'POST',
+        'method': 'PUT',
         'data-template': {'task': '<str:task>'}
     }
 }
@@ -64,11 +67,10 @@ def prepare_todo_ops(todo_id, **kwargs):
             except AttributeError:
                 # The value doesn't have any string format field substitutions. This is because either it's a fixed data
                 # item, or the data is something to be substituted by the client. These are set off by "< >", which are
-                # not supported by str.format(). We'll just log this for debugging purposes.
-                print("skipped field %s with value %s" % (cfield, cval))
+                # not supported by str.format().
+                pass
             else:
                 prepped_ops[op][cfield] = prepped_val
-    print("prepped_ops: %s" % prepped_ops)
     return prepped_ops
 
 
@@ -79,6 +81,15 @@ class TodoStatus(Resource):
         ops = prepare_todo_ops(todo_id)
         return {'todo_id': todo_id, 'status': status, 'operations': ops}
 
+    def put(self, todo_id):
+        abort_if_todo_doesnt_exist(todo_id)
+        todo = TODOS[todo_id]
+        args = parser.parse_args()
+        status = args['status']
+        TODOS[todo_id]['status'] = status
+        ops = prepare_todo_ops(todo_id, **args)
+        todo["operations"] = ops
+        return todo, 201
 
 # Todo
 # shows a single todo item and lets you delete a todo item
@@ -101,20 +112,6 @@ class Todo(Resource):
         TODOS[todo_id] = task
         return task, 201
 
-    def post(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        todo = TODOS[todo_id]
-        args = parser.parse_args()
-        print("ARGS: %s" % args)
-        if args.get('status'):
-            TODOS[todo_id]['status'] = args['status']
-        if args.get('task'):
-            TODOS[todo_id]['task'] = args['task']
-        ops = prepare_todo_ops(todo_id, **args)
-        todo["operations"] = ops
-        return todo, 201
-
-
 
 # TodoList
 # shows a list of all todos, and lets you POST to add new tasks
@@ -129,9 +126,15 @@ class TodoList(Resource):
         TODOS[todo_id] = {'task': args['task']}
         return TODOS[todo_id], 201
 
+
+class ResourceMap(Resource):
+    def get(self):
+        return RESOURCE_MAP, 200
+
 ##
 ## Actually setup the Api resource routing here
 ##
+api.add_resource(ResourceMap, '/')
 api.add_resource(TodoList, '/todos')
 api.add_resource(Todo, '/todos/<todo_id>')
 api.add_resource(TodoStatus, '/todos/<todo_id>/status')

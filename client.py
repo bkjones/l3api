@@ -2,11 +2,10 @@ from requests import Request, Session, get
 
 s = Session()
 
-def get_todo_by_id(id):
-    return get('http://localhost:5000/todos/{}'.format(id))
 
-def get_todo_status_by_id(id):
-    return get('http://localhost:5000/todos/{}/status'.format(id))
+def get_todo_by_id(todo_id):
+    return get('{url}/{id}'.format(url=TODO_BASE_URL, id=todo_id))
+
 
 def update_data_template(template, **kwargs):
     """Some operations have a 'data-template' field whose value is a json block of attributes, at least one of which
@@ -23,8 +22,6 @@ def perform_op(todo, opname, **kwargs):
     """Assembles a requests.Request object using templated data we got from a response body
 
     """
-    todo = todo.json()
-
     # pulls out the part of the response body 'operations' pertaining only to the operation we want to perform
     op_dict = {op:opconfig for (op, opconfig) in todo['operations'].items() if op == opname}
 
@@ -44,15 +41,20 @@ def perform_op(todo, opname, **kwargs):
 
 
 if __name__ == '__main__':
-   todo = get_todo_by_id('todo3')
-   print("GET TODO: %s" % todo.json())
+    resource_map = get('http://localhost:5000/')
+    print("Resource map: %s" % resource_map.json())
 
-   existing_status = get_todo_status_by_id('todo3')
-   print("GET Existing Status: %s" % existing_status.json())
+    TODO_BASE_URL = resource_map.json()['todos']
 
-   status_update_response = perform_op(todo, 'complete-todo')
-   print("Update status result: %s" % status_update_response.json())
+    # The 'todo' here is a json blob that stays in module-level space & is accessed by functions directly unless it's
+    # overwritten in another scope.
+    todo_id = 'todo3'
+    todo = get_todo_by_id(todo_id).json()
+    print("GET TODO: %s" % todo)
 
-   task_update_response = perform_op(todo, 'change-task', task='Task name updated!')
-   print ("Update task result: %s" % task_update_response.json())
+    status_update_response = perform_op(todo, 'complete-todo')
+    print("Update status result: %s" % status_update_response.json())
+
+    task_update_response = perform_op(todo, 'change-task', task='Task name updated!')
+    print ("Update task result: %s" % task_update_response.json())
 
