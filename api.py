@@ -11,14 +11,20 @@ TODOS = {
     'todo3': {'task': 'profit!', 'status': 'backlog'},
 }
 
+#   Making this available to clients *could* enable us to further decouple from the client. If client code looks up
+# endpoint locations even for top-level resources, we can change any part of the URL structure, instead of just the
+# structure underneath each top-level resource. So, for example, if we introduced a 'project' resource & assigned all
+# todos to a project, moving them from '/todos' to '/{project_id}/todos', this map would make that transparent
+# to the client.
 RESOURCE_MAP = {
     'todos': 'http://localhost:5000/todos'
 }
 
+# This is used by clients to construct URLs and request body payloads. It's what enables the client code to navigate the
+# API the way a human navigates a website without knowing the URL structure of the site.
 #   In this structure, items inside quotes surrounded by curly braces are items the *server* should replace before
 # sending to the client. Items in angle brackets are delivered as-is to the client, and are items the client should
-# provide before sending a new request to the server. In general, the server should provide complete URIs to the client,
-# with distinct placeholders in the template denoting the data type & name of the value expected from the client.
+# provide before sending a new request to the server.
 #   'data-template' is a field which provides placeholders to be filled in by clients when making a new request to the
 # 'url' in the same operation.
 #   'data-fixed' can be dropped into the body of a future request, unaltered.
@@ -47,6 +53,7 @@ TODO_OPS = {
 def abort_if_todo_doesnt_exist(todo_id):
     if todo_id not in TODOS:
         abort(404, message="Todo {} doesn't exist".format(todo_id))
+
 
 parser = reqparse.RequestParser()
 parser.add_argument('task')
