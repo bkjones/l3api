@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask
+from flask import Flask, request
 from flask_restful import reqparse, abort, Api, Resource
 
 app = Flask(__name__)
@@ -51,12 +51,20 @@ parser.add_argument('status')
 
 
 def prepare_todo_ops(todo_id, **kwargs):
+    """Where items in TODO_OPS require substitution w/ data values we know, we provide those substitutions. This way,
+    most values we return (like the URL to an operation on a specific object by ID) are ready to use, requiring no
+    transformation by the client.
+
+    """
     prepped_ops = TODO_OPS
     for op, config in TODO_OPS.items():
         for cfield, cval in config.items():
             try:
                 prepped_val = cval.format(**kwargs, todo_id=todo_id)
             except AttributeError:
+                # The value doesn't have any string format field substitutions. This is because either it's a fixed data
+                # item, or the data is something to be substituted by the client. These are set off by "< >", which are
+                # not supported by str.format(). We'll just log this for debugging purposes.
                 print("skipped field %s with value %s" % (cfield, cval))
             else:
                 prepped_ops[op][cfield] = prepped_val
@@ -97,8 +105,11 @@ class Todo(Resource):
         abort_if_todo_doesnt_exist(todo_id)
         todo = TODOS[todo_id]
         args = parser.parse_args()
-        status = args['status']
-        TODOS[todo_id]['status'] = status
+        print("ARGS: %s" % args)
+        if args.get('status'):
+            TODOS[todo_id]['status'] = args['status']
+        if args.get('task'):
+            TODOS[todo_id]['task'] = args['task']
         ops = prepare_todo_ops(todo_id, **args)
         todo["operations"] = ops
         return todo, 201
