@@ -134,7 +134,7 @@ any changes to the client.
 
 In addition, there are some operations for which the server is in a position to know the fields *and* values required to 
 be in the payload. In those cases, if changes in the API design require that data to change, but remain in the realm of 
-data values the server knows, know changes will be required on the client end. Likewise, if a field that previously required 
+data values the server knows, no changes will be required on the client end. Likewise, if a field that previously required 
 substitution by the client changes & becomes 'fixed data' that the API can deliver, this should also not involve a code change 
 on the client side. 
 
