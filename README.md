@@ -34,7 +34,7 @@ its intent (the operation performed by hitting 'submit' on the form), and the fi
 to indicate to the user what to do, and if fields are required or optional. 
 
 So, you can pretty much get anywhere and do anything on the web, because there are links you can follow, which are labeled 
-in some was as to where they'll take you, and there are forms that enable user input, and the forms & fields are also labeled 
+in some way as to where they'll take you, and there are forms that enable user input, and the forms & fields are also labeled 
 to make it clear to the user what to do. 
 
 Modern API Evolution
