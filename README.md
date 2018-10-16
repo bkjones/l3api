@@ -160,7 +160,7 @@ The design represented in this repository does have a couple of drawbacks. Namel
  =================
  
  I think it's possible to improve on this design to further decouple the cient and the API implementation. This was only 
- a short foray into this way of designing an API, and I found one or two ways to further decoupling along the way, so I'm sure 
+ a short foray into this way of designing an API, and I found one or two ways to further decouple along the way, so I'm sure 
  there are more I haven't considered or thought of yet. 
 
  
