@@ -101,10 +101,10 @@ Why Level 3 REST Matters
 
 An API being a Level 3 design, as previously mentioned, doesn't much matter. However, it's a convenient handle to represent 
 what's implied by a Level 3 REST API, and how those things benefit the team and the client. To my mind, utilizing hypermedia 
-to enable clients to perform generic operations in their implementations instead of pasting hyper-specific URLs, methods, and 
+to enable clients to perform generic operations in their implementations is better than pasting hyper-specific URLs, methods, and 
 data payloads, leaving them tightly chained to each individual piece of the APIs current implementation. 
 
-In other words, customers are consuming the implementation of the API. They're not leveraging the design of the API. As such, 
+In other words, by *not* using hypermedia, customers are consuming the implementation of the API. They're not leveraging the design of the API. As such, 
 maintenance overhead and disruptive change are more common.
 
 One Approach at a Level 3 API, Illustrated
